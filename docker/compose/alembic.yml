@@ -5,7 +5,7 @@ services:
     image: embassy_bot:latest
     container_name: bot_alembic
     networks:
-      - local
+      - embassy_bot_network
     # build:
     #   context: ${PWD}
     #   dockerfile: docker/Dockerfile

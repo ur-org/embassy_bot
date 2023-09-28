@@ -5,7 +5,7 @@ services:
     image: postgres:latest
     container_name: bot_database
     networks:
-      - local
+      - embassy_bot_network
     volumes:
       - postgres_data_database:/var/lib/postgresql/data/
     env_file:

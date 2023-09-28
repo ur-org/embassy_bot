@@ -16,7 +16,7 @@ services:
     depends_on:
       - redis
     networks:
-      - local
+      - embassy_bot_network
 
   # celery_beat:
   #   image: embassy_bot:latest
@@ -31,7 +31,7 @@ services:
   #   depends_on:
   #     - redis
   #   networks:
-  #     - local
+  #     - embassy_bot_network
 
 
   # flower:
@@ -55,4 +55,4 @@ services:
   #     - celery_worker
   #     - redis
   #   networks:
-  #     - local
+  #     - embassy_bot_network

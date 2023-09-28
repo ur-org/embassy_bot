@@ -1,3 +1,8 @@
 from .commands import commands_router
-from .messages import messages_router
-from .form import form_router
+from .url import url_router
+
+
+__all__ = (
+    "commands_router",
+    "url_router",
+)

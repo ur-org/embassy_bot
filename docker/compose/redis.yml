@@ -13,27 +13,27 @@ services:
     env_file:
       - ${PWD}/.env
     networks:
-      - local
+      - embassy_bot_network
 
-  redis_commander:
-    image: rediscommander/redis-commander:latest
-    container_name: bot_redis_commander
-    restart: unless-stopped
-    ports:
-      - ${REDIS_COMMANDER_PORT}:${REDIS_COMMANDER_PORT}
-    env_file:
-      - ${PWD}/.env
-    environment:
-      - REDIS_HOSTS=${REDIS_HOST}
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT}
-      - HTTP_USER=${REDIS_COMMANDER_USER}
-      - HTTP_PASSWORD=${REDIS_COMMANDER_PASSWORD}
-      - PORT=${REDIS_COMMANDER_PORT}
-    depends_on:
-      - redis
-    networks:
-      - local
+  # redis_commander:
+  #   image: rediscommander/redis-commander:latest
+  #   container_name: bot_redis_commander
+  #   restart: unless-stopped
+  #   ports:
+  #     - ${REDIS_COMMANDER_PORT}:${REDIS_COMMANDER_PORT}
+  #   env_file:
+  #     - ${PWD}/.env
+  #   environment:
+  #     - REDIS_HOSTS=${REDIS_HOST}
+  #     - REDIS_HOST=${REDIS_HOST}
+  #     - REDIS_PORT=${REDIS_PORT}
+  #     - HTTP_USER=${REDIS_COMMANDER_USER}
+  #     - HTTP_PASSWORD=${REDIS_COMMANDER_PASSWORD}
+  #     - PORT=${REDIS_COMMANDER_PORT}
+  #   depends_on:
+  #     - redis
+  #   networks:
+  #     - embassy_bot_network
 
 volumes:
   redis:

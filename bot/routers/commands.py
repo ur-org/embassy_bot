@@ -1,14 +1,14 @@
 from aiogram import Router, Bot
 from aiogram.types import Message, FSInputFile, MenuButtonWebApp, WebAppInfo
-from aiogram.filters import Command, ExceptionMessageFilter
+from aiogram.filters import Command
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.database.orm import UserModel
-import bot.const.phrases as phrases
-from bot import markups
+from bot.const.phrases import phrase_for_start_first_greeting
+from bot.markups import user_main_menu_markup
 from app.settings import application_settings
-from bot.background_tasks import send_message_task
+# from bot.background_tasks import send_message_task
 
 commands_router = Router()
 
@@ -16,12 +16,12 @@ commands_router = Router()
 @commands_router.message(Command(commands=["start"]))
 async def start(message: Message, bot: Bot, session: AsyncSession) -> None:
     first_name = message.from_user.first_name
-    markup = markups.user_main_markup()
-    text = phrases.phrase_for_start_first_greeting(data=dict(user_name=first_name))
+    markup = user_main_menu_markup()
+    text = phrase_for_start_first_greeting(data=dict(user_name=first_name))
 
-    # sending image sticker
-    sticker = FSInputFile("static/hello.webp")
-    await message.answer_sticker(sticker)
+    # # sending image sticker
+    # sticker = FSInputFile("static/hello.webp")
+    # await message.answer_sticker(sticker)
 
     # check if user exists
     user = (
@@ -56,10 +56,10 @@ async def start(message: Message, bot: Bot, session: AsyncSession) -> None:
     )
 
 
-@commands_router.message(Command(commands=["check"]))
-async def check(message: Message, bot: Bot) -> None:
-    task = send_message_task.apply_async(args=[message.from_user.id])
+# @commands_router.message(Command(commands=["check"]))
+# async def check(message: Message, bot: Bot) -> None:
+#     task = send_message_task.apply_async(args=[message.from_user.id])
 
-    await message.answer(
-        text="Ok",
-    )
+#     await message.answer(
+#         text="Ok",
+#     )

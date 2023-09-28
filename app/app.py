@@ -1,16 +1,13 @@
-import logging
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from aiogram.types import Update
 
+from .logger import logger
 from .settings import application_settings
 from bot.bot import dp, bot
 from app.core.depends import DatabaseSession
 
-
-logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
-logger = logging.getLogger(__name__)
 
 app = FastAPI(
     debug=application_settings.DEBUG,
@@ -37,7 +34,7 @@ async def process_update(request: Request, session: DatabaseSession):
         update = Update(**update)
         await dp.feed_update(bot=bot, update=update, session=session)
     except ValueError:
-        logging.warning("body", await request.body())
+        logger.warning("body", await request.body())
 
 
 @app.get("/menu", response_class=HTMLResponse)

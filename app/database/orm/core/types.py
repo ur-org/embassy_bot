@@ -58,3 +58,4 @@ str_4 = Annotated[str, mapped_column(types.String(4))]
 text = Annotated[str, mapped_column(types.Text)]
 
 id_pk_type = Annotated[int, constraints.id_pk]
+user_id_fk_type = Annotated[int, constraints.user_id_fk]
