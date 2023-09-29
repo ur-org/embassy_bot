@@ -15,7 +15,7 @@ services:
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_DB: ${DATABASE_NAME}
     ports:
-      - ${DATABASE_PORT_EXPOSE}:5432
+      - ${DATABASE_PORT_EXPOSE}:${DATABASE_PORT}
     expose:
       - ${DATABASE_PORT_EXPOSE}
     healthcheck:
@@ -23,7 +23,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-    command: -p 5432
+    command: -p ${DATABASE_PORT}
 
 volumes:
   postgres_data_database:
