@@ -133,7 +133,6 @@ class ApplicationResponse(ExcludeNone, GenericModel, Generic[ResponseT]):
         smart_union = True
         orm_mode = True
 
-    ok: bool
     result: Optional[ResponseT] = None
     detail: Optional[DetailT] = None
     error: Optional[ErrorT] = None
