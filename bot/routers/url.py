@@ -24,13 +24,12 @@ from bot.markups import (
 
 class AddUrlStates(StatesGroup):
     enter_url = State()
-    edit_url = State()
 
 
 url_router = Router()
 
 
-@url_router.message(ButtonFilter(text=MainMenuButtons.ADD_URL.value))
+@url_router.message(ButtonFilter(MainMenuButtons.ADD_URL))
 async def handle_add_url_button(
     message: Message, state: FSMContext, session: AsyncSession
 ) -> Any:
@@ -57,7 +56,7 @@ async def handle_add_url_button(
 
 
 @url_router.message(
-    AddUrlStates.enter_url, ButtonFilter(text=ReturnToMainMenuButtons.RETURN.value)
+    AddUrlStates.enter_url, ButtonFilter(ReturnToMainMenuButtons.RETURN)
 )
 async def handle_return_to_main_menu(message: Message, state: FSMContext) -> Any:
     await state.clear()

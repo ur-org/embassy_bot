@@ -5,7 +5,7 @@
 #* general
 DEBUG=1
 APP_HOSTNAME=
-APP_EXPOSE_PORT=
+APP_PORT=
 
 #* telegram bot
 BOT_TOKEN=

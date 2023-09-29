@@ -19,8 +19,8 @@ services:
       - database
       - redis
     ports:
-      - ${APP_EXPOSE_PORT}:8000
+      - ${APP_PORT}:8000
     expose:
-      - ${APP_EXPOSE_PORT}
+      - ${APP_PORT}
     networks:
       - embassy_bot_network

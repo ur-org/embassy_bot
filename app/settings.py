@@ -12,7 +12,13 @@ class Settings(BaseSettings):
 class ApplicationSettings(BaseSettings):
     DEBUG: bool = False
     APP_HOSTNAME: str
-    APP_EXPOSE_PORT: int = 80
+    APP_PORT: int = 80
+    EMBASSY_SERVICE_HOSTNAME: str
+    EMBASSY_SERVICE_PORT: int
+
+    @property
+    def embassy_service_url(self) -> str:
+        return f'http://{self.EMBASSY_SERVICE_HOSTNAME}:{self.EMBASSY_SERVICE_PORT}'
 
 
 application_settings = ApplicationSettings()

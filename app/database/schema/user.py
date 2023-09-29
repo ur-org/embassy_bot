@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Optional
 
-from database.core import ORMSchema, mixins
+from .core import ORMSchema, mixins
 
 
-class User(
+class UserSchema(
     mixins.NameMixin, ORMSchema
 ):
     tg_id: int

@@ -1,6 +1,6 @@
-from .test_task import test_task
+from .check import background_task
 
 
 __all__ = (
-    "test_task",
+    "background_task",
 )

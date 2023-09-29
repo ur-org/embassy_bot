@@ -10,6 +10,7 @@ from typing_extensions import Annotated
 
 from . import constraints
 
+
 bool_no_value = Annotated[bool, mapped_column(types.Boolean)]
 bool_false = Annotated[bool, mapped_column(types.Boolean, default=False, nullable=True)]
 bool_true = Annotated[bool, mapped_column(types.Boolean, default=True, nullable=True)]
@@ -59,3 +60,4 @@ text = Annotated[str, mapped_column(types.Text)]
 
 id_pk_type = Annotated[int, constraints.id_pk]
 user_id_fk_type = Annotated[int, constraints.user_id_fk]
+url_id_fk_type = Annotated[int, constraints.url_id_fk]
