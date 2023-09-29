@@ -7,7 +7,7 @@ from app.settings import application_settings
 def get_schedule_update(tg_id: int, url: str) -> Any:
     response = httpx.post(
         f"{application_settings.embassy_service_url}/get_update",
-        data={
+        json={
             "tg_id": tg_id,
             "url": url,
         },
