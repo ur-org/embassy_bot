@@ -41,7 +41,7 @@ async def add_update_result(url_id: int, update_result: bool) -> None:
 def background_task():
     loop = asyncio.get_event_loop()
     users = loop.run_until_complete(get_users())
-    logger.info(f"Users found: {len(user)}")
+    logger.info(f"Users found: {len(users)}")
 
     for user in users:
         for url in user.urls:
