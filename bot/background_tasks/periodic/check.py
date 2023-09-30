@@ -50,7 +50,7 @@ def background_task():
                 url=url.url,
             )
 
-            if response["result"]:
+            if not response["result"]:
                 from bot import bot_instance
 
                 loop.run_until_complete(
