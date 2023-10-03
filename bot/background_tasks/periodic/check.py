@@ -1,5 +1,5 @@
 import asyncio
-from typing import List
+from typing import List, Dict
 
 from sqlalchemy import select, insert
 from sqlalchemy.orm import selectinload
@@ -25,13 +25,15 @@ async def get_users() -> List[UserSchema]:
         )
 
 
-async def add_update_result(url_id: int, update_result: bool) -> None:
+async def add_update_result(url_id: int, response: Dict) -> None:
     async with async_sessionmaker.begin() as session:
         await session.execute(
             insert(UrlUpdateModel).values(
                 {
                     UrlUpdateModel.url_id: url_id,
-                    UrlUpdateModel.status: update_result,
+                    UrlUpdateModel.status: response["result"]["available"],
+                    UrlUpdateModel.timestamp: response["result"]["timestamp"],
+                    UrlUpdateModel.is_error: response["error"],
                 }
             )
         )
@@ -50,7 +52,7 @@ def background_task():
                 url=url.url,
             )
 
-            if response["result"]:
+            if response["result"]["available"]:
                 from bot import bot_instance
 
                 loop.run_until_complete(
@@ -63,6 +65,6 @@ def background_task():
             loop.run_until_complete(
                 add_update_result(
                     url_id=url.id,
-                    update_result=response["result"],
+                    response=response,
                 )
             )

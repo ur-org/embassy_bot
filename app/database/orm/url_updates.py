@@ -12,7 +12,11 @@ if TYPE_CHECKING:
 
 
 class UrlUpdateModel(
-    mixins.UrlIDMixin, ORMModel,
+    mixins.UrlIDMixin,
+    ORMModel,
 ):
     status: Mapped[bool_no_value]
+    is_error: Mapped[bool_no_value]
+    timestamp: Mapped[int]
+
     url: Mapped[Optional[UserUrlModel]] = relationship(back_populates="statuses")
