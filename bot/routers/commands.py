@@ -1,15 +1,22 @@
 from typing import List
-from uuid import uuid1
 
-from aiogram import Router, Bot
-from aiogram.types import Message, FSInputFile, MenuButtonWebApp, WebAppInfo
+from aiogram import Router
+from aiogram.types import (
+    Message,
+    BufferedInputFile,
+)
 from aiogram.filters import Command
 from sqlalchemy import select, insert
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import contains_eager
 from sqlalchemy.ext.asyncio import AsyncSession
 import plotly.graph_objects as go
 
-from app.database.orm import UserModel, UrlUpdateModel
+from app.logger import logger
+from app.database.orm import (
+    UserModel,
+    UrlUpdateModel,
+    UserUrlModel,
+)
 from bot.const.phrases import phrase_for_start_first_greeting
 from bot.markups import user_main_menu_markup
 
@@ -19,7 +26,7 @@ commands_router = Router()
 
 
 @commands_router.message(Command(commands=["start"]))
-async def start(message: Message, bot: Bot, session: AsyncSession) -> None:
+async def start(message: Message, session: AsyncSession) -> None:
     first_name = message.from_user.first_name
     text = phrase_for_start_first_greeting(data=dict(user_name=first_name))
 
@@ -63,76 +70,95 @@ async def start(message: Message, bot: Bot, session: AsyncSession) -> None:
 
 
 @commands_router.message(Command(commands=["stat"]))
-async def start(message: Message, bot: Bot, session: AsyncSession) -> None:
-    updates: List[UrlUpdateModel] = (
-        (
-            await session.execute(
-                select(UserModel.urls)
-                .where(UserModel.tg_id == message.from_user.id)
-                .options(selectinload(UserModel.urls))
-            )
+async def stat(message: Message, session: AsyncSession) -> None:
+    args = message.text.split(' ')[1:]
+    limit = args[0] if args else 10
+
+    subq = (
+        select(UrlUpdateModel.id)
+        .filter(UrlUpdateModel.url_id == UserUrlModel.id)
+        .order_by(UrlUpdateModel.created_at.desc(), UrlUpdateModel.id)
+        .limit(limit)
+        .correlate(UserUrlModel)
+        .subquery()
+    )
+
+    user_info: List[UrlUpdateModel] = (
+        await session.execute(
+            select(UserModel)
+            .where(UserModel.tg_id == message.from_user.id)
+            .outerjoin(UserModel.urls)
+            .outerjoin(UrlUpdateModel, UrlUpdateModel.id.in_(subq))
+            .options(contains_eager(
+                UserModel.urls,
+                UserUrlModel.statuses,
+            ))
         )
-        .scalars()
-        .all()
-    )
+    ).unique().scalar_one_or_none()
 
-    dates = []
-    results = []
+    urls = user_info.urls
 
-    for update in updates:
-        dates.append(update.created_at)
+    for url in urls:
+        dates = []
+        results = []
+        for update in url.statuses:
+            dates.append(update.created_at.strftime("%Y-%m-%d %H:%M:%S"))
 
-        status = update.status
-        if update.is_error:
-            status = "Error"
-        results.append(status)
+            status = update.status
+            if update.is_error:
+                status = "Error"
+            results.append(status)
 
-    layout = go.Layout(
-        autosize=False,
-        margin=dict(
-            l=20,
-            r=20,
-            t=10,
-            b=10,
-        ),
-        height=(
-            30 * (len(updates) + 1) + 10 + 10
-        ),  # heights of header and rows + top and bottom margins
-    )
-    fig = go.Figure(
-        layout=layout,
-        data=[
-            go.Table(
-                header=dict(
-                    values=["date", "result"],
-                    align=["center", "center"],
-                    fill_color="#E5D1FA",
-                    height=30,
-                    font=dict(
-                        color="#303841",
-                        size=10,
+        logger.info(f"TEST: {dates} - {results}")
+
+        (margin_left, margin_right) = (1, 1)
+        layout = go.Layout(
+            autosize=False,
+            margin=dict(
+                l=margin_left,
+                r=margin_right,
+                t=1,
+                b=1,
+            ),
+            height=(
+                30 * (len(url.statuses) + 1) + margin_left + margin_right
+            ),  # heights of header and rows + top and bottom margins
+        )
+        fig = go.Figure(
+            layout=layout,
+            data=[
+                go.Table(
+                    header=dict(
+                        values=["date", "result"],
+                        align=["center", "center"],
+                        fill_color="#E5D1FA",
+                        height=30,
+                        font=dict(
+                            color="#303841",
+                            size=10,
+                        ),
                     ),
-                ),
-                cells=dict(
-                    values=[
-                        dates,
-                        results,
-                    ],
-                    align=["center", "center"],
-                    fill_color="#ECF2FF",
-                    height=30,
-                    font=dict(
-                        color="#303841",
-                        size=10,
+                    cells=dict(
+                        values=[
+                            dates,
+                            results,
+                        ],
+                        align=["center", "center"],
+                        fill_color="#ECF2FF",
+                        height=30,
+                        font=dict(
+                            color="#303841",
+                            size=10,
+                        ),
                     ),
-                ),
-            )
-        ]
-    )
-    stat_image_name = f'{uuid1()}.png'
-    fig.write_image(stat_image_name, scale=2)
+                )
+            ],
+        )
 
-    await message.answer_sticker(FSInputFile(stat_image_name))
+        await message.answer_photo(
+            photo=BufferedInputFile(file=fig.to_image(scale=2), filename="image.png"),
+            caption=url.url,
+        )
 
 
 # @commands_router.message(Command(commands=["check"]))

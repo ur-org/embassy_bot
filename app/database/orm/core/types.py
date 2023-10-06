@@ -16,7 +16,7 @@ bool_false = Annotated[bool, mapped_column(types.Boolean, default=False, nullabl
 bool_true = Annotated[bool, mapped_column(types.Boolean, default=True, nullable=True)]
 
 created_at_timezone = Annotated[
-    datetime, mapped_column(types.DateTime(timezone=True), server_default=func.now())
+    datetime, mapped_column(type_=types.DateTime(timezone=True), server_default=func.now())
 ]
 updated_at_timezone = Annotated[
     datetime,

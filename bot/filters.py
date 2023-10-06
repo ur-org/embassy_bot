@@ -10,3 +10,4 @@ class ButtonFilter(Filter):
 
     async def __call__(self, message: Message) -> bool:
         return message.text.lower() == self.button.value.lower()
+    
