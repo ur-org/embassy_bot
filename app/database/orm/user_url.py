@@ -18,4 +18,4 @@ class UserUrlModel(
     url: Mapped[text]
 
     user: Mapped[Optional[UserModel]] = relationship(back_populates="urls")
-    statuses: Mapped[Optional[List[UrlUpdateModel]]] = relationship(back_populates="url")
+    statuses: Mapped[Optional[List[UrlUpdateModel]]] = relationship(back_populates="url", order_by="desc(UrlUpdateModel.created_at)")
