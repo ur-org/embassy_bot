@@ -1,5 +1,4 @@
 from typing import List
-from io import BytesIO
 
 from aiogram import Router
 from aiogram.types import (
@@ -119,7 +118,11 @@ async def stat(message: Message, session: AsyncSession) -> None:
                 status = "Error"
             results.append(status)
 
-        logger.info(f"TEST: {dates} - {results}")
+        if not url.statuses:
+            await message.answer(
+                text=f"No updates for url {url.url}",
+            )
+            continue
 
         (margin_left, margin_right) = (1, 1)
         layout = go.Layout(
@@ -177,18 +180,44 @@ async def stat(message: Message, session: AsyncSession) -> None:
 @commands_router.message(Command(commands=["out"]))
 async def stat(message: Message, session: AsyncSession) -> None:
     args = message.text.split(" ")[1:]
-    update_id = int(args[0] if args else 10)
+    update_id = int(args[0] if args else 0)
+    if not update_id:
+        await message.answer(
+            text="No update id provided!\nUse this command like that: /out <update_id>",
+            parse_mode=None,
+        )
+        return
 
     update = (
         await session.execute(
-            select(UrlUpdateModel).where(UrlUpdateModel.id == update_id)
+            select(UrlUpdateModel)
+            .where(
+                 UrlUpdateModel.id == update_id,
+                 UserModel.tg_id == message.from_user.id,
+            )
+            .join(UrlUpdateModel.url)
+            .join(UserUrlModel.user)
         )
     ).scalar_one_or_none()
 
-    await message.answer_photo(
-        photo=BufferedInputFile(
-            file=get_image(tg_id=message.from_user.id, timestamp=update.timestamp),
-            filename="image.png",
-        ),
-        caption=f"Output image for update #{update_id}",
-    )
+    print("UPDATE", update)
+
+    if not update:
+        await message.answer(
+            text=f"Id {update_id} does not exist",
+        )
+        return
+
+    image = get_image(tg_id=message.from_user.id, timestamp=update.timestamp)
+    if image:
+        await message.answer_photo(
+            photo=BufferedInputFile(
+                file=image,
+                filename="image.png",
+            ),
+            caption=f"Output image for update #{update_id}",
+        )
+    else:
+        await message.answer(
+            text=f"No information for this id: {update_id}",
+        )
