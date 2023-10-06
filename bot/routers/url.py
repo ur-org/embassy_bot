@@ -46,7 +46,7 @@ async def handle_add_url_button(
     text: str = (
         "Please send your url"
         if len(urls) == 0
-        else f"You already have one url to check:\n**{urls[0].url}** \nTo update it send a new one"
+        else f"You already have one url to check:\n{urls[0].url} \nTo update it send a new one"
     )
 
     await state.set_state(AddUrlStates.enter_url)
