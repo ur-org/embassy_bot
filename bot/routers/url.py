@@ -6,7 +6,8 @@ from aiogram.types import (
 )
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
-from sqlalchemy import select, insert, update, func
+from sqlalchemy import select, insert, update
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.orm import UserModel, UserUrlModel
@@ -33,21 +34,23 @@ url_router = Router()
 async def handle_add_url_button(
     message: Message, state: FSMContext, session: AsyncSession
 ) -> Any:
-    urls_count = (
+    user_info = (
         await session.execute(
-            select(func.count(UserModel.urls))
+            select(UserModel)
             .where(UserModel.tg_id == message.from_user.id)
+            .options(selectinload(UserModel.urls))
         )
     ).scalar_one()
 
+    urls = user_info.urls
     text: str = (
         "Please send your url"
-        if urls_count == 0
-        else "You already have one url to check! To update it send a new one"
+        if len(urls) == 0
+        else f"You already have one url to check:\n**{urls[0].url}** \nTo update it send a new one"
     )
 
     await state.set_state(AddUrlStates.enter_url)
-    await state.update_data(update=(urls_count != 0))
+    await state.update_data(update=(len(urls) != 0))
 
     await message.answer(
         text=text,
