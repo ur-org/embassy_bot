@@ -19,6 +19,11 @@ def get_schedule_update(tg_id: int, url: str) -> Any:
         logger.critical(
             f"Critical error caused by {e.request.url} - {e}", exc_info=False
         )
+    except Exception as e:
+        logger.critical(
+            f"Critical error - {e}",
+            exc_info=False,
+        )
 
 
 def get_image(tg_id: int, timestamp: int) -> str:
